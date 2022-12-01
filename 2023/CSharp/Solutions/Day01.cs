@@ -4,7 +4,9 @@ public sealed class Day01 : Solver
     private IDictionary<int,long> calories = new Dictionary<int,long>();
     private int caloriesCurrentElv = 0;
 
-    public Day01(string inputPath) : base(inputPath)
+    public Day01(string inputPath) : base(inputPath) {}
+
+    protected override Task Setup()
     {
         foreach(var line in _inputs)
         {
@@ -17,6 +19,7 @@ public sealed class Day01 : Solver
             else caloriesCurrentElv += int.Parse(line);
         }
         calories.Add(elfCount, caloriesCurrentElv);
+        return Task.CompletedTask;
     }
 
     protected override async Task<long> Part1()
