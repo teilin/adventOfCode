@@ -1,4 +1,11 @@
-﻿var inputFilePath = Environment.GetCommandLineArgs()[1];
+﻿// if(Environment.GetCommandLineArgs().Count() != 2)
+// {
+//     Console.WriteLine("Arguments missing...");
+//     Console.WriteLine("First argument need to be path to puzzle input and second should be the day name.");
+//     return;
+// }
+
+var inputFilePath = Environment.GetCommandLineArgs()[1];
 var solution = Environment.GetCommandLineArgs()[2];
 
 var solutions = new Dictionary<string,Solver>()
