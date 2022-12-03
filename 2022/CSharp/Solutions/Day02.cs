@@ -6,7 +6,7 @@ public sealed class Day02 : Solver
 
     protected override Task Setup()
     {
-        foreach(var line in _inputs)
+        foreach(var line in Inputs)
         {
             var l = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var o = Transform(l[0].ToCharArray()[0]);

@@ -8,7 +8,7 @@ public sealed class Day01 : Solver
 
     protected override Task Setup()
     {
-        foreach(var line in _inputs)
+        foreach(var line in Inputs)
         {
             if(string.IsNullOrEmpty(line)) 
             {   

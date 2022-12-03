@@ -23,7 +23,7 @@ public sealed class Day03 : Solver
     protected override async Task<long> Part1()
     {
         var priSum = 0L;
-        foreach(var line in _inputs)
+        foreach(var line in Inputs)
         {
             var chunks = line.Chunk(line.Length/2);
             var c1 = chunks.ElementAt(0).AsEnumerable();
@@ -40,11 +40,11 @@ public sealed class Day03 : Solver
     protected override async Task<long> Part2()
     {
         var priSum = 0L;
-        for(var i=0;i<_inputs.Count();i+=3)
+        for(var i=0;i<Inputs.Count();i+=3)
         {
-            var r1 = _inputs.ElementAt(i).ToCharArray();
-            var r2 = _inputs.ElementAt(i+1).ToCharArray();
-            var r3 = _inputs.ElementAt(i+2).ToCharArray();
+            var r1 = Inputs.ElementAt(i).ToCharArray();
+            var r2 = Inputs.ElementAt(i+1).ToCharArray();
+            var r3 = Inputs.ElementAt(i+2).ToCharArray();
             var intersect = r1.Intersect(r2).Intersect(r3);
             if(intersect.Any())
             {
