@@ -11,7 +11,8 @@ var solution = Environment.GetCommandLineArgs()[2];
 var solutions = new Dictionary<string,Solver>()
 {
     {"Day01", new Day01(inputFilePath)},
-    {"Day02", new Day02(inputFilePath)}
+    {"Day02", new Day02(inputFilePath)},
+    {"Day03", new Day03(inputFilePath)}
 };
 
 if(solutions.ContainsKey(solution))
