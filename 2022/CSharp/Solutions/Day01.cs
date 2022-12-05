@@ -22,12 +22,12 @@ public sealed class Day01 : Solver
         return Task.CompletedTask;
     }
 
-    protected override async Task<long> Part1()
+    protected override async Task<object> Part1()
     {
         return await Task.FromResult(calories.Values.Max());
     }
 
-    protected override async Task<long> Part2()
+    protected override async Task<object> Part2()
     {
         return await Task.FromResult(calories.OrderByDescending(o => o.Value).Take(3).Sum(s => s.Value));
     }

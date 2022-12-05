@@ -30,7 +30,7 @@ public sealed class Day04 : Solver
         return Task.CompletedTask;
     }
 
-    protected override async Task<long> Part1()
+    protected override async Task<object> Part1()
     {
         var count = 0L;
         foreach(var pair in _pairs)
@@ -43,7 +43,7 @@ public sealed class Day04 : Solver
         return await Task.FromResult(count);
     }
 
-    protected override async Task<long> Part2()
+    protected override async Task<object> Part2()
     {
         var count = 0L;
         foreach(var pair in _pairs)

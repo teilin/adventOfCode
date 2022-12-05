@@ -15,7 +15,7 @@ public sealed class Day02 : Solver
         return Task.CompletedTask;
     }
 
-    protected override async Task<long> Part1()
+    protected override async Task<object> Part1()
     {
         var totalScore = 0L;
 
@@ -27,7 +27,7 @@ public sealed class Day02 : Solver
         return await Task.FromResult(totalScore);
     }
 
-    protected override async Task<long> Part2()
+    protected override async Task<object> Part2()
     {
         var totalScore = 0L;
         foreach(var round in _rounds)

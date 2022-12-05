@@ -20,7 +20,7 @@ public sealed class Day03 : Solver
         return Task.CompletedTask;
     }
 
-    protected override async Task<long> Part1()
+    protected override async Task<object> Part1()
     {
         var priSum = 0L;
         foreach(var line in Inputs)
@@ -37,7 +37,7 @@ public sealed class Day03 : Solver
         return await Task.FromResult(priSum);
     }
 
-    protected override async Task<long> Part2()
+    protected override async Task<object> Part2()
     {
         var priSum = 0L;
         for(var i=0;i<Inputs.Count();i+=3)

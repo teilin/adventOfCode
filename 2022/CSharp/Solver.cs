@@ -19,8 +19,8 @@ public abstract class Solver
     public string RawInput => _inputRaw;
 
     protected abstract Task Setup();
-    protected abstract Task<long> Part1();
-    protected abstract Task<long> Part2();
+    protected abstract Task<object> Part1();
+    protected abstract Task<object> Part2();
 
     public async Task Run()
     {
