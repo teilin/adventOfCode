@@ -16,7 +16,8 @@ var solutions = new Dictionary<string,Solver>()
     {"Day04", new Day04(inputFilePath)},
     {"Day05", new Day05(inputFilePath)},
     {"Day06", new Day06(inputFilePath)},
-    {"Day07", new Day07(inputFilePath)}
+    {"Day07", new Day07(inputFilePath)},
+    {"Day08", new Day08(inputFilePath)}
 };
 
 if(solutions.ContainsKey(solution))
