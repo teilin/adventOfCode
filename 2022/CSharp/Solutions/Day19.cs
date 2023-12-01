@@ -1,81 +1,95 @@
+using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
+using Microsoft.VisualBasic;
 
 public sealed class Day19 : Solver
 {
+    private List<int[]> data = new List<int[]>();
+
     public Day19(string inputPath) : base(inputPath) {}
 
     protected override Task Setup()
     {
+        parse(Inputs.ToList());
         return Task.CompletedTask;
     }
-
+// https://github.com/sec/aoc2022/blob/main/aoc2022/Code/Day19.cs
+// https://github.com/p88h/aoc2022/blob/main/lib/day19.cs
     protected override async Task<object> Part1()
     {
-        var minutes = 24;
-        var reggy = new Regex(@"Blueprint ([0-9]+):\s+Each ore robot costs ([0-9]+) ore\.\s+Each clay robot costs ([0-9]+) ore\.\s+Each obsidian robot costs ([0-9]+) ore and ([0-9]+) clay\.\s+Each geode robot costs ([0-9]+) ore and ([0-9]+) obsidian\.");
-        var sum = reggy.Matches(RawInput).Select(match =>
-        {
-            Dictionary<int, int[]> robotCosts = new();
-            var matches = match.Groups.Values.Skip(1).Select(m => int.Parse(m.Value)).ToList();
-            robotCosts[0] = new int[] { matches[1], 0, 0, 0 };
-            robotCosts[1] = new int[] { matches[2], 0, 0, 0 };
-            robotCosts[2] = new int[] { matches[3], matches[4], 0, 0 };
-            robotCosts[3] = new int[] { matches[5], 0, matches[6], 0 };
-            var limittingFactor = new int[] {
-                robotCosts.Values.Select(rc=>rc[0]).Skip(1).Max(),
-                (matches[4]+2) / 3 * 2,
-                (matches[6]+1) / 2,
-                int.MaxValue
-            };
-            var currentResources = new int[] { 0, 0, 0, 0 };
-            var currentRobots = new int[] { 1, 0, 0, 0 };
-            var b = bestResult(robotCosts, limittingFactor, currentResources, currentRobots, minutes);
-            return b * matches[0];
-        }).Sum();
-        return await Task.FromResult(sum);
+        int[] bpscores = new int[data.Count];
+        var solution = Enumerable.Range(0, data.Count).AsParallel()
+            .Select(idx => (idx+1)*maxsim(new int[] { 1, 0, 0, 0 }, new int[4] { 1, 0, 0, 0 }, data[idx], 1, 24, ref bpscores[idx]))
+            .Sum();
+        return await Task.FromResult(solution);
     }
 
     protected override async Task<object> Part2()
     {
-        return await Task.FromResult(0);
+        int[] bpscores = new int[3]; 
+        var solution = Enumerable.Range(0, 3).AsParallel()
+            .Select(idx => maxsim(new int[] { 1, 0, 0, 0 }, new int[4] { 1, 0, 0, 0 }, data[idx], 1, 32, ref bpscores[idx]))
+            .Aggregate((t, n) => t * n).ToString();
+        return await Task.FromResult(solution);
     }
 
-    public static int bestResult(
-        Dictionary<int, int[]> robotCosts,
-        int[] limittingFactor,
-        int[] currentResources,
-        int[] currentRobots,
-        int timeRemaining
-        )
+    public void parse(List<string> input) 
     {
-        //Console.WriteLine($"[{string.Join(",", currentResources)}] [{string.Join(",", currentRobots)}] : {timeRemaining}");
-        if (timeRemaining <= 0)
-            return currentResources[3];
-        var nextBuy = robotCosts
-            .Select(rc => (
-                key: rc.Key,
-                additionalResources: rc.Value.Zip(currentResources).Select((t) => t.First - t.Second).ToArray()
-                ))
-            .Where(ar => currentRobots[ar.key] < limittingFactor[ar.key])
-            .Where(ar => ar.additionalResources.Zip(currentRobots).All((t) => t.Second != 0 || t.First == 0))
-            .Select(ar => (
-                key: ar.key,
-                timeNeeded: Math.Max(ar.additionalResources.Zip(currentRobots).Select((t) => t.Second == 0 ? 0 : (t.First + t.Second - 1) / t.Second).Max(), 0)
-            ))
-            .Where(tn => tn.timeNeeded < timeRemaining)
-            .ToList();
-        if (nextBuy.Count() == 0)
-            return currentRobots[3] * timeRemaining + currentResources[3];
+        int[] idxs = { 6, 12, 18, 21, 27, 30 };
+        foreach (var s in input) {
+            var ss = s.Split(' ');
+            var t = new int[idxs.Length];
+            for (int i = 0; i < idxs.Length; i++) t[i] = int.Parse(ss[idxs[i]]);
+            data.Add(t);
+        }
+    }
 
-        return nextBuy.Select(nb =>
-        {
-            var nextResources = currentRobots
-                .Zip(currentResources).Select(v => v.First * (nb.timeNeeded + 1) + v.Second)
-                .Zip(robotCosts[nb.key]).Select(v => v.First - v.Second).ToArray();
-            var nextRobots = currentRobots.ToArray();
-            nextRobots[nb.key]++;
-            var nextTime = timeRemaining - nb.timeNeeded - 1;
-            return bestResult(robotCosts, limittingFactor, nextResources, nextRobots, nextTime);
-        }).Max();
+    (int[], int[], int) nextState(int[] rs, int[] cs, int p, int r1, int c1, int r2, int c2) 
+    {
+        int w = Math.Max((c1 - cs[r1] + rs[r1] - 1) / rs[r1], (c2 - cs[r2] + rs[r2] - 1) / rs[r2]);
+        if (w < 0) w = 0; w++;
+        int[] ncs = new int[4] { cs[0] + rs[0] * w, cs[1] + rs[1] * w, cs[2] + rs[2] * w, cs[3] + rs[3] * w };
+        ncs[r1] -= c1; ncs[r2] -= c2;
+        int[] nrs = new int[4] { rs[0], rs[1], rs[2], rs[3] }; nrs[p]++;
+        return (nrs, ncs, w);
+    }
+
+    int maxsim(int[] rs, int[] cs, int[] blueprint, int r, int maxr, ref int max_score) 
+    {
+        int max = 0, w;
+        int[] nrs, ncs;
+        if (r > maxr) return 0;
+        if (r == maxr) { max_score = Math.Max(max_score, cs[3]); return cs[3]; };
+        int tmp = cs[3] + rs[3] * (maxr - r);
+        // Update current projected output.
+        max_score = Math.Max(max_score, tmp);
+        // Assuming current projected output and building a new geode robot every round; 
+        // the sum is the arithmetic sequence sum which is 
+        if (tmp + (maxr - r) * (maxr - r - 1) / 2 < max_score) return cs[3];
+        // check if we can build a geode robot first. No max.
+        if (rs[2] > 0) {
+            (nrs, ncs, w) = nextState(rs, cs, 3, 0, blueprint[4], 2, blueprint[5]);
+            if (r + w <= maxr) tmp = maxsim(nrs, ncs, blueprint, r + w, maxr, ref max_score);
+            max = Math.Max(max, tmp);
+            if (w == 1) return max;
+            // can't build a new robot at all. 
+            if (r + w > maxr && cs[2] + (maxr - r) * (maxr - r - 1) / 2 < blueprint[5]) return max;
+        }
+        // build ore robot next, up to 4 max.
+        if (rs[0] < 4) {
+            (nrs, ncs, w) = nextState(rs, cs, 0, 0, blueprint[0], 0, 0);
+            max = Math.Max(max, maxsim(nrs, ncs, blueprint, r + w, maxr, ref max_score));
+        }
+        // same for a clay robot, up to 8 max.
+        if (rs[1] < 8) {
+            (nrs, ncs, w) = nextState(rs, cs, 1, 0, blueprint[1], 0, 0);
+            max = Math.Max(max, maxsim(nrs, ncs, blueprint, r + w, maxr, ref max_score));
+        }
+        // same for an obsidian robot, up to 8 max.
+        if (rs[1] > 0 && rs[2] < 8) {
+            (nrs, ncs, w) = nextState(rs, cs, 2, 0, blueprint[2], 1, blueprint[3]);
+            max = Math.Max(max, maxsim(nrs, ncs, blueprint, r + w, maxr, ref max_score));
+        }
+        return max;
     }
 }

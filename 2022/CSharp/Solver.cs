@@ -9,6 +9,8 @@ public abstract class Solver
         _inputPath = inputPath;
     }
 
+    public string InputPath => _inputPath;
+
     private async Task Init()
     {
         _inputs = await File.ReadAllLinesAsync(_inputPath);
